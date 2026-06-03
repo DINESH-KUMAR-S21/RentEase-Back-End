@@ -1,7 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
+// import rateLimit from 'express-rate-limit'; // Disabled for development
 import cors from 'cors';
 import errorHandleMiddleware from './middleware/error.js';
 
@@ -28,30 +28,29 @@ app.use(cors({
 }));
 
 // ─── RATE LIMITING ────────────────────────────────────────────────
+// DISABLED FOR DEVELOPMENT - Enable for production
+// const apiLimiter = rateLimit({
+//     windowMs: 15 * 60 * 1000, // 15 minutes
+//     max: 100,
+//     message: {
+//         success: false,
+//         message: "Too many requests from this IP, please try again after 15 minutes"
+//     },
+//     standardHeaders: true,
+//     legacyHeaders: false
+// });
 
-// General API limiter
-const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100,
-    message: {
-        success: false,
-        message: "Too many requests from this IP, please try again after 15 minutes"
-    },
-    standardHeaders: true,
-    legacyHeaders: false
-});
-
-// Strict limiter for auth routes
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10,
-    message: {
-        success: false,
-        message: "Too many login attempts from this IP, please try again after 15 minutes"
-    },
-    standardHeaders: true,
-    legacyHeaders: false
-});
+// // Strict limiter for auth routes
+// const authLimiter = rateLimit({
+//     windowMs: 15 * 60 * 1000, // 15 minutes
+//     max: 10,
+//     message: {
+//         success: false,
+//         message: "Too many login attempts from this IP, please try again after 15 minutes"
+//     },
+//     standardHeaders: true,
+//     legacyHeaders: false
+// });
 
 // ─── MIDDLEWARE ───────────────────────────────────────────────────
 app.use(express.json({ limit: "10mb" }));
@@ -59,10 +58,12 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 
 // ─── ROUTES ───────────────────────────────────────────────────────
-app.use("/api/v1", apiLimiter);                 // apply to all routes
-app.use("/api/v1/register", authLimiter);        // stricter on auth
-app.use("/api/v1/login", authLimiter);
-app.use("/api/v1/password/forgot", authLimiter);
+// Rate limiting disabled for development
+// Uncomment below for production:
+// app.use("/api/v1", apiLimiter);                 // apply to all routes
+// app.use("/api/v1/register", authLimiter);        // stricter on auth
+// app.use("/api/v1/login", authLimiter);
+// app.use("/api/v1/password/forgot", authLimiter);
 
 app.use("/api/v1", products);
 app.use("/api/v1", user);

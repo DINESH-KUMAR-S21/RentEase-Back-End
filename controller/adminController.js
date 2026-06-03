@@ -39,13 +39,16 @@ export const getAdminDashboard = handleAsyncError(async (req, res, next) => {
         (acc, rental) => acc + rental.totalRentalPrice, 0
     );
 
-    // Revenue this month
+    // Revenue this month - based on when rental was COMPLETED (updatedAt), not created
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
+    const endOfMonth = new Date();
+    endOfMonth.setHours(23, 59, 59, 999);
+    
     const monthlyRentals = await Rental.find({
         rentalStatus: "Completed",
-        createdAt: { $gte: startOfMonth }
+        updatedAt: { $gte: startOfMonth, $lte: endOfMonth }
     });
     const monthlyRevenue = monthlyRentals.reduce(
         (acc, rental) => acc + rental.totalRentalPrice, 0
@@ -77,7 +80,7 @@ export const getRevenueAnalytics = handleAsyncError(async (req, res, next) => {
         {
             $match: {
                 rentalStatus: "Completed",
-                createdAt: {
+                updatedAt: {
                     $gte: new Date(`${year}-01-01`),
                     $lte: new Date(`${year}-12-31`)
                 }
@@ -85,7 +88,7 @@ export const getRevenueAnalytics = handleAsyncError(async (req, res, next) => {
         },
         {
             $group: {
-                _id: { $month: "$createdAt" },
+                _id: { $month: "$updatedAt" },
                 revenue: { $sum: "$totalRentalPrice" },
                 count: { $sum: 1 }
             }

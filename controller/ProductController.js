@@ -68,11 +68,20 @@ export const getAllProducts =handleAsyncError(async (req, res, next) => {
     // Check if random products are requested
     if (req.query.random === 'true') {
         const limit = Number(req.query.limit) || 4;
+        
+        // Debug logs
+        console.log('🔍 Fetching random products with limit:', limit);
+        const totalCount = await product.countDocuments();
+        console.log('📊 Total products in DB:', totalCount);
+        
         const products = await product.aggregate([
             { $sample: { size: limit } }
         ]);
 
+        console.log('✅ Aggregation result:', products.length, 'products found');
+
         if(!products || products.length === 0){
+            console.log('⚠️ No products returned from aggregation');
             return next(new HandleError("No products found", 404));
         }
 

@@ -383,7 +383,7 @@ export const getVendorDashboard = handleAsyncError(async (req, res, next) => {
         activeRentals,
         pendingReturns,
         maintenanceRequests,
-        totalRentals
+        completedRentals
     ] = await Promise.all([
         Product.countDocuments({ vendor: vendorId }),
         Product.countDocuments({ vendor: vendorId, availability: "Available" }),
@@ -395,7 +395,23 @@ export const getVendorDashboard = handleAsyncError(async (req, res, next) => {
     ]);
 
     // Calculate total revenue
-    const totalRevenue = totalRentals.reduce(
+    const totalRevenue = completedRentals.reduce(
+        (acc, rental) => acc + rental.totalRentalPrice, 0
+    );
+
+    // Calculate monthly revenue - based on when rental was COMPLETED (updatedAt)
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    const endOfMonth = new Date();
+    endOfMonth.setHours(23, 59, 59, 999);
+    
+    const monthlyCompletedRentals = await Rental.find({
+        vendor: vendorId,
+        rentalStatus: "Completed",
+        updatedAt: { $gte: startOfMonth, $lte: endOfMonth }
+    });
+    const monthlyRevenue = monthlyCompletedRentals.reduce(
         (acc, rental) => acc + rental.totalRentalPrice, 0
     );
 
@@ -408,7 +424,8 @@ export const getVendorDashboard = handleAsyncError(async (req, res, next) => {
             activeRentals,
             pendingReturns,
             maintenanceRequests,
-            totalRevenue
+            totalRevenue,
+            monthlyRevenue
         }
     });
 });
