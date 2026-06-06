@@ -82,6 +82,11 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 
 // ─── ROUTES ───────────────────────────────────────────────────────
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({ success: true, message: 'Server is running' });
+});
+
 // Rate limiting disabled for development
 // Uncomment below for production:
 // app.use("/api/v1", apiLimiter);                 // apply to all routes
@@ -89,14 +94,23 @@ app.use(cookieParser());
 // app.use("/api/v1/login", authLimiter);
 // app.use("/api/v1/password/forgot", authLimiter);
 
+console.log('📍 Registering routes...');
 app.use("/api/v1", products);
+console.log('✅ Products routes registered');
 app.use("/api/v1", user);
+console.log('✅ User routes registered');
 app.use("/api/v1", order);
+console.log('✅ Order routes registered');
 app.use("/api/v1", cart);
+console.log('✅ Cart routes registered');
 app.use("/api/v1", rental);
+console.log('✅ Rental routes registered');
 app.use("/api/v1", vendor);
+console.log('✅ Vendor routes registered');
 app.use("/api/v1", maintenance);
+console.log('✅ Maintenance routes registered');
 app.use("/api/v1", admin);
+console.log('✅ Admin routes registered');
 
 // ─── ERROR MIDDLEWARE (always last) ───────────────────────────────
 app.use(errorHandleMiddleware);
