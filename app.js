@@ -20,35 +20,40 @@ const app = express();
 app.use(helmet());
 
 // ─── CORS CONFIGURATION ───────────────────────────────────────────
-const allowedOrigins = [
-    process.env.FRONTEND_URL,
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:5175',
-    'http://localhost:5176',
-    'http://localhost:5177',
-    'http://localhost:5178',
-    'https://rent-ease-front-end.vercel.app'
-].filter(Boolean); // Remove undefined/null values
+// Log the environment URL being used
+console.log(`📋 FRONTEND_URL from env: ${process.env.FRONTEND_URL}`);
 
+// Simplified CORS - Allow specific origins
 const corsOptions = {
-    origin: (origin, callback) => {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            console.warn(`CORS blocked origin: ${origin}`);
-            callback(null, true); // Allow anyway for debugging - change to false in production
-        }
-    },
+    origin: [
+        'https://rent-ease-front-end.vercel.app',
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://localhost:5175',
+        'http://localhost:5176',
+        'http://localhost:5177',
+        'http://localhost:5178',
+        process.env.FRONTEND_URL
+    ].filter(Boolean),
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     exposedHeaders: ['Content-Type', 'Authorization'],
-    maxAge: 3600
+    maxAge: 3600,
+    optionsSuccessStatus: 200 // For legacy browsers
 };
 
+console.log('✅ Allowed CORS origins:', corsOptions.origin);
+
+// Apply CORS middleware
 app.use(cors(corsOptions));
+
+// ─── REQUEST LOGGING ──────────────────────────────────────────────
+// Log all incoming requests
+app.use((req, res, next) => {
+    console.log(`📨 ${req.method} ${req.path} - Origin: ${req.get('origin') || 'no-origin'}`);
+    next();
+});
 
 // ─── RATE LIMITING ────────────────────────────────────────────────
 // DISABLED FOR DEVELOPMENT - Enable for production
