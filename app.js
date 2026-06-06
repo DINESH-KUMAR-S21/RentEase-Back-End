@@ -49,7 +49,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('/*', cors(corsOptions)); // Handle preflight requests
 
 // ─── RATE LIMITING ────────────────────────────────────────────────
 // DISABLED FOR DEVELOPMENT - Enable for production
@@ -95,22 +94,61 @@ app.get('/health', (req, res) => {
 // app.use("/api/v1/password/forgot", authLimiter);
 
 console.log('📍 Registering routes...');
-app.use("/api/v1", products);
-console.log('✅ Products routes registered');
-app.use("/api/v1", user);
-console.log('✅ User routes registered');
-app.use("/api/v1", order);
-console.log('✅ Order routes registered');
-app.use("/api/v1", cart);
-console.log('✅ Cart routes registered');
-app.use("/api/v1", rental);
-console.log('✅ Rental routes registered');
-app.use("/api/v1", vendor);
-console.log('✅ Vendor routes registered');
-app.use("/api/v1", maintenance);
-console.log('✅ Maintenance routes registered');
-app.use("/api/v1", admin);
-console.log('✅ Admin routes registered');
+try {
+    app.use("/api/v1", products);
+    console.log('✅ Products routes registered');
+} catch (err) {
+    console.error('❌ FAILED to register products routes:', err.message);
+}
+
+try {
+    app.use("/api/v1", user);
+    console.log('✅ User routes registered');
+} catch (err) {
+    console.error('❌ FAILED to register user routes:', err.message);
+}
+
+try {
+    app.use("/api/v1", order);
+    console.log('✅ Order routes registered');
+} catch (err) {
+    console.error('❌ FAILED to register order routes:', err.message);
+}
+
+try {
+    app.use("/api/v1", cart);
+    console.log('✅ Cart routes registered');
+} catch (err) {
+    console.error('❌ FAILED to register cart routes:', err.message);
+}
+
+try {
+    app.use("/api/v1", rental);
+    console.log('✅ Rental routes registered');
+} catch (err) {
+    console.error('❌ FAILED to register rental routes:', err.message);
+}
+
+try {
+    app.use("/api/v1", vendor);
+    console.log('✅ Vendor routes registered');
+} catch (err) {
+    console.error('❌ FAILED to register vendor routes:', err.message);
+}
+
+try {
+    app.use("/api/v1", maintenance);
+    console.log('✅ Maintenance routes registered');
+} catch (err) {
+    console.error('❌ FAILED to register maintenance routes:', err.message);
+}
+
+try {
+    app.use("/api/v1", admin);
+    console.log('✅ Admin routes registered');
+} catch (err) {
+    console.error('❌ FAILED to register admin routes:', err.message);
+}
 
 // ─── ERROR MIDDLEWARE (always last) ───────────────────────────────
 app.use(errorHandleMiddleware);

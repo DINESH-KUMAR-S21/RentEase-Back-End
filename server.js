@@ -3,7 +3,16 @@ import dotenv from 'dotenv';
 // Load environment variables FIRST
 dotenv.config({ path: './backend/config/config.env' });
 
-import app from './app.js';
+let app;
+try {
+    const appModule = await import('./app.js');
+    app = appModule.default;
+    console.log('✅ App module loaded successfully');
+} catch (err) {
+    console.error('❌ CRITICAL: Failed to load app module:', err);
+    process.exit(1);
+}
+
 import { connectDB } from './config/db.js';
 
 connectDB();
@@ -20,4 +29,10 @@ process.on("unhandledRejection", (err) => {
     server.close(() => {
         process.exit(1);
     });
+});
+
+process.on("uncaughtException", (err) => {
+    console.error(`❌ Uncaught Exception: ${err.message}`);
+    console.error(err.stack);
+    process.exit(1);
 });
