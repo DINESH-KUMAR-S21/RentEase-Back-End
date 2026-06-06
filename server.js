@@ -1,30 +1,40 @@
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Load environment variables FIRST
-dotenv.config({ path: './backend/config/config.env' });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-let app;
-try {
-    const appModule = await import('./app.js');
-    app = appModule.default;
-    console.log('✅ App module loaded successfully');
-} catch (err) {
-    console.error('❌ CRITICAL: Failed to load app module:', err);
+// Load environment variables FIRST - Use absolute path
+dotenv.config({ path: path.join(__dirname, './config/config.env') });
+
+// Verify DB_URI is loaded
+if (!process.env.DB_URI) {
+    console.error('❌ CRITICAL: DB_URI not found in config.env');
+    console.error('Environment variables loaded:', Object.keys(process.env).filter(k => k.includes('DB') || k.includes('FRONTEND')));
     process.exit(1);
 }
 
+import app from './app.js';
 import { connectDB } from './config/db.js';
 
-connectDB();
-
-const port = process.env.PORT || 3000;
+// Start server
+const port = process.env.PORT || 8000;
 
 const server = app.listen(port, () => {
-    console.log(`Server is running on port ${port} in ${process.env.NODE_ENV} mode`);
+    console.log(`🚀 Server is running on port ${port} in ${process.env.NODE_ENV} mode`);
+});
+
+// Connect to database
+connectDB().catch((err) => {
+    console.error('❌ Database connection failed:', err.message);
+    server.close(() => {
+        process.exit(1);
+    });
 });
 
 process.on("unhandledRejection", (err) => {
-    console.log(`Error: ${err.message}`);
+    console.log(`❌ Error: ${err.message}`);
     console.log("Shutting down the server due to unhandled promise rejection");
     server.close(() => {
         process.exit(1);
