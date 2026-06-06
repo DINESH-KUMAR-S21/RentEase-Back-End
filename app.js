@@ -49,7 +49,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Handle preflight requests
+app.options('/*', cors(corsOptions)); // Handle preflight requests
 
 // ─── RATE LIMITING ────────────────────────────────────────────────
 // DISABLED FOR DEVELOPMENT - Enable for production
