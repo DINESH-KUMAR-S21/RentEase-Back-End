@@ -23,18 +23,40 @@ app.use(helmet());
 // Log the environment URL being used
 console.log(`📋 FRONTEND_URL from env: ${process.env.FRONTEND_URL}`);
 
-// Simplified CORS - Allow specific origins
+// Simplified CORS - Allow specific origins and Vercel preview domains
+const allowedStaticOrigins = [
+    'https://rent-ease-front-end.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'http://localhost:5176',
+    'http://localhost:5177',
+    'http://localhost:5178'
+].filter(Boolean);
+
+// Merge any configured FRONTEND_URL
+if (process.env.FRONTEND_URL) allowedStaticOrigins.push(process.env.FRONTEND_URL);
+
 const corsOptions = {
-    origin: [
-        'https://rent-ease-front-end.vercel.app',
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'http://localhost:5175',
-        'http://localhost:5176',
-        'http://localhost:5177',
-        'http://localhost:5178',
-        process.env.FRONTEND_URL
-    ].filter(Boolean),
+    origin: function(origin, callback) {
+        // Allow requests with no origin (e.g., server-to-server, curl)
+        if (!origin) return callback(null, true);
+
+        try {
+            const hostname = new URL(origin).hostname;
+
+            // Allow exact matches
+            if (allowedStaticOrigins.includes(origin)) return callback(null, true);
+
+            // Allow any subdomain under vercel.app (preview deployments)
+            if (hostname && hostname.endsWith('.vercel.app')) return callback(null, true);
+
+            // Otherwise reject
+            return callback(new Error('CORS policy: Origin not allowed'), false);
+        } catch (err) {
+            return callback(new Error('CORS policy: Invalid origin'), false);
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -43,7 +65,7 @@ const corsOptions = {
     optionsSuccessStatus: 200 // For legacy browsers
 };
 
-console.log('✅ Allowed CORS origins:', corsOptions.origin);
+console.log('✅ Allowed CORS static origins:', allowedStaticOrigins);
 
 // Apply CORS middleware
 app.use(cors(corsOptions));

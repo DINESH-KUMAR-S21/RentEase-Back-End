@@ -52,7 +52,8 @@ async function testImageUpload(vendorToken) {
 
     console.log('Sending test image upload request...');
 
-    const response = await axios.post('http://localhost:8000/api/v1/vendor/product/create', formData, {
+    const BACKEND_BASE_URL = process.env.BACKEND_BASE_URL || 'http://localhost:8000';
+    const response = await axios.post(`${BACKEND_BASE_URL}/api/v1/vendor/product/create`, formData, {
       headers: {
         ...formData.getHeaders(),
         Authorization: `Bearer ${vendorToken}`

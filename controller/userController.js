@@ -94,7 +94,8 @@ export const requestPasswordReset = handleAsyncError(async (req, res, next) => {
         { returnDocument: 'after', runValidators: false }
     );
 
-    const resetPasswordURL = `http://localhost:8000/api/v1/reset/${resetToken}`;
+    const BACKEND_BASE_URL = process.env.BACKEND_BASE_URL || 'http://localhost:8000';
+    const resetPasswordURL = `${BACKEND_BASE_URL}/api/v1/reset/${resetToken}`;
     const message = `You requested a password reset. Please click on the link to reset your password: \n\n ${resetPasswordURL} \n\n If you did not request this, please ignore this email.`;
     try {
         await sendEmail({
