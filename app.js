@@ -38,7 +38,9 @@ console.log('✅ CORS configured to allow origin:', FRONTEND_URL);
 
 // Apply CORS middleware and enable preflight responses
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+// Use '/*' (not '*') for Express route matching so path-to-regexp parses correctly.
+// Older patterns like '*' trigger path-to-regexp errors in newer versions.
+app.options('/*', cors(corsOptions));
 
 // ─── REQUEST LOGGING ──────────────────────────────────────────────
 // Log all incoming requests
