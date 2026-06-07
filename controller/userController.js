@@ -62,7 +62,14 @@ export const loginUser = handleAsyncError( async (req, res, next) => {
 //Logout
 
 export const logout = handleAsyncError(async (req, res, next) => {
-    res.clearCookie('token');
+    // Clear cookie with same attributes used when setting it so browsers remove it correctly
+    const clearOptions = {
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        secure: process.env.NODE_ENV === 'production'
+    };
+
+    res.clearCookie('token', clearOptions);
     res.status(200).json({
         success: true,
         message: "Successfully logged out"
