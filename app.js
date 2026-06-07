@@ -20,55 +20,25 @@ const app = express();
 app.use(helmet());
 
 // ─── CORS CONFIGURATION ───────────────────────────────────────────
-// Log the environment URL being used
-console.log(`📋 FRONTEND_URL from env: ${process.env.FRONTEND_URL}`);
-
-// Simplified CORS - Allow specific origins and Vercel preview domains
-const allowedStaticOrigins = [
-    'https://rent-ease-front-end.vercel.app',
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:5175',
-    'http://localhost:5176',
-    'http://localhost:5177',
-    'http://localhost:5178'
-].filter(Boolean);
-
-// Merge any configured FRONTEND_URL
-if (process.env.FRONTEND_URL) allowedStaticOrigins.push(process.env.FRONTEND_URL);
+// Use the deployed frontend origin (or localhost during development).
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+console.log(`📋 FRONTEND_URL from env: ${FRONTEND_URL}`);
 
 const corsOptions = {
-    origin: function(origin, callback) {
-        // Allow requests with no origin (e.g., server-to-server, curl)
-        if (!origin) return callback(null, true);
-
-        try {
-            const hostname = new URL(origin).hostname;
-
-            // Allow exact matches
-            if (allowedStaticOrigins.includes(origin)) return callback(null, true);
-
-            // Allow any subdomain under vercel.app (preview deployments)
-            if (hostname && hostname.endsWith('.vercel.app')) return callback(null, true);
-
-            // Otherwise reject
-            return callback(new Error('CORS policy: Origin not allowed'), false);
-        } catch (err) {
-            return callback(new Error('CORS policy: Invalid origin'), false);
-        }
-    },
-    credentials: true,
+    origin: FRONTEND_URL,
+    credentials: true, // allow cookies to be sent
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     exposedHeaders: ['Content-Type', 'Authorization'],
-    maxAge: 3600,
-    optionsSuccessStatus: 200 // For legacy browsers
+    optionsSuccessStatus: 200,
+    maxAge: 3600
 };
 
-console.log('✅ Allowed CORS static origins:', allowedStaticOrigins);
+console.log('✅ CORS configured to allow origin:', FRONTEND_URL);
 
-// Apply CORS middleware
+// Apply CORS middleware and enable preflight responses
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // ─── REQUEST LOGGING ──────────────────────────────────────────────
 // Log all incoming requests
