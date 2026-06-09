@@ -107,7 +107,7 @@ export const requestPasswordReset = handleAsyncError(async (req, res, next) => {
     try {
         await sendEmail({
             email: user.email,
-            subject: "Rentease Password Reset",
+            subject: "Rentyfy Password Reset",
             message: message
         });
     } catch (error) {
